@@ -1,0 +1,67 @@
+.Container{
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.Header{
+    display: flex;
+    border-bottom: 2px solid rgba(190,190,190,0.1);
+    align-items: center;
+    align-content: center;
+    justify-content: space-between;
+}
+
+.HeaderDetails{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    padding: 10px 20px;
+}
+
+.Name{
+    margin-left: 10px;
+}
+
+.Message{
+    overflow: scroll;
+    flex: 1;
+}
+
+.Message::-webkit-scrollbar{
+    display: none;
+}
+
+.Input{
+    display: flex;
+    align-items: center;
+    padding: 10px 10px;
+    background-color: transparent;
+    border-top: 2px solid rgba(190, 190, 190, 0.1);;
+}
+
+.Input>form{
+    display: flex;
+    flex:1;
+    flex-direction: row;
+}
+
+.Input>form>input {
+    width: 90%;
+    outline-width: 0;
+    border: 0;
+    background-color: transparent;
+    padding: 5px;
+    color: white;
+    border-radius: 33px;
+}
+
+.Input>form>button{
+    color:lightgray;
+}
+
+.Input>form>button:hover {
+    color: #0088cc;
+}
