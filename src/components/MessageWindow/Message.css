@@ -16,6 +16,11 @@
 
 }
 
+
+.response>div>p{
+    color:black;
+}
+
 .message>div>p{
     color: white;
 }

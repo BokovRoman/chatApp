@@ -1,4 +1,4 @@
-
+import axios from 'axios';
 import { Avatar, IconButton } from '@material-ui/core';
 import styles from './Thread.module.css';
 import MessageWindow from '../MessageWindow/MessageWindow';
@@ -9,13 +9,14 @@ import { useSelector } from 'react-redux';
 import { selectThreadId, selectThreadName } from '../../features/threadSlice';
 import firebase from "firebase/compat/app";
 import { selectUser } from '../../features/userSlice';
+axios.defaults.timeout = 5000;
 
 
 
 function Thread() {
 
     const [input, setInput] = useState("");
-
+    const [response, setResponse] = useState({ joke: '' });
     const [messages, setMessages] = useState([]);
     const threadName = useSelector(selectThreadName);
     const threadId = useSelector(selectThreadId);
@@ -33,6 +34,16 @@ function Thread() {
         }
 
     }, [threadId])
+
+
+    const responseMessage = async () => {
+        const result = await axios.get('https://api.chucknorris.io/jokes/random');
+        // console.log(result.data.value);
+        setResponse({
+            ...response,
+            joke:result.data.value
+        })
+    }
     
     const sendMessage = (e) => {
         e.preventDefault()
@@ -42,8 +53,10 @@ function Thread() {
                 uid: user.uid,
                 photo: user.photo,
                 email: user.email,
-                displayName:user.displayName
-            })
+                displayName: user.displayName,
+                response:response.joke
+        })
+        responseMessage();
         
         setInput('');
     }
@@ -62,13 +75,14 @@ function Thread() {
             </div>
             <div className={styles.Message}>
           
-                    {messages.map(({ id, data:{message,photo, timestamp, email} }) => (
+                    {messages.map(({ id, data:{message,photo, timestamp, email,response} }) => (
                     <MessageWindow id={id}
                         key={id}
                         message={message}
                         photo={photo}
-                            timestamp={timestamp}
+                        timestamp={timestamp}
                             email={email}
+                            response={response}
                     />
                 ))}
             </div>
@@ -80,7 +94,7 @@ function Thread() {
                         placeholder='Type your message'
                         type='text'
                     />
-                    <IconButton onClick={sendMessage} type="submit">
+                    <IconButton onClick={sendMessage } type="submit">
                         <SendIcon
                         />
                     </IconButton>
