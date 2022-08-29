@@ -9,54 +9,72 @@ import { useSelector } from 'react-redux';
 import { selectThreadId, selectThreadName } from '../../features/threadSlice';
 import firebase from "firebase/compat/app";
 import { selectUser } from '../../features/userSlice';
-axios.defaults.timeout = 5000;
+import { updateDoc } from 'firebase/firestore';
 
 
 
 function Thread() {
 
     const [input, setInput] = useState("");
-    const [response, setResponse] = useState({ joke: '' });
     const [messages, setMessages] = useState([]);
     const threadName = useSelector(selectThreadName);
     const threadId = useSelector(selectThreadId);
     const user = useSelector(selectUser);
 
+
+    const responseMessage =  (r, threadRef) => {
+        
+        setTimeout(() => {
+            debugger;
+            axios.get('https://api.chucknorris.io/jokes/random')
+                .then((res) => {
+                    
+                    updateDoc(r, {
+                        response: res.data.value,
+                        responsePhoto:'xx',
+                        responseTimestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    });
+
+                    updateDoc(threadRef,{timestamp:firebase.firestore.FieldValue.serverTimestamp()})
+
+                });
+
+
+        },10000)    
+        
+    }
+
+
     useEffect(() => {
 
         if (threadId) {
             db.collection('threads').doc(threadId).collection
-            ('messages').orderBy("timestamp", "desc").onSnapshot(
+            ('messages').orderBy("timestamp", "asc").onSnapshot(
                 (snapshot) => setMessages(snapshot.docs.map((doc) => ({
                     id: doc.id,
                     data:doc.data(),
-            }))))
+                }))))
         }
 
     }, [threadId])
 
 
-    const responseMessage = async () => {
-        const result = await axios.get('https://api.chucknorris.io/jokes/random');
-        // console.log(result.data.value);
-        setResponse({
-            ...response,
-            joke:result.data.value
-        })
-    }
     
     const sendMessage = (e) => {
         e.preventDefault()
         db.collection('threads').doc(threadId).collection('messages').add({
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                message: input,
-                uid: user.uid,
-                photo: user.photo,
-                email: user.email,
-                displayName: user.displayName,
-                response:response.joke
-        })
-        responseMessage();
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            message: input,
+            uid: user.uid,
+            photo: user.photo,
+            email: user.email,
+            displayName: user.displayName,
+        }).then((r) => {
+            const threadRef = db.collection('threads').doc(threadId);
+            updateDoc(threadRef,{timestamp:firebase.firestore.FieldValue.serverTimestamp()})
+            responseMessage(r, threadRef);
+    })
+        
         
         setInput('');
     }
@@ -75,16 +93,27 @@ function Thread() {
             </div>
             <div className={styles.Message}>
           
-                    {messages.map(({ id, data:{message,photo, timestamp, email,response} }) => (
+                    {messages.map(({ id, data:{message,photo, responseTimestamp,timestamp, email,response} }) => (
                     <MessageWindow id={id}
                         key={id}
                         message={message}
                         photo={photo}
                         timestamp={timestamp}
-                            email={email}
-                            response={response}
+                        email={email}
+                        response={response}
+                        responseTimestamp={responseTimestamp}
                     />
-                ))}
+                    ))}
+                
+                        {/* {response.map(({ id, data:{ timestamp, email,response, date} }) => (
+                    <ResponseWindow id={id}
+                        key={id}
+                        date={date}
+                        email={email}
+                        response={response}
+                    />
+                ))} */}
+
             </div>
             <div className={styles.Input}>
                 <form>

@@ -11,38 +11,36 @@ const MessageWindow=forwardRef(({
     message,
     photo,
     email,
-    response
+    response,
+    responseTimestamp
 }, ref) => {
   
   const user = useSelector(selectUser);
 
   return (
     <>
-    <div className={`message ${user.email===email&&`message-sender`}`} ref={ref}>
-      <Avatar className='message-photo'
-        src={photo}
-      />
+      <div className={`message ${user.email===email&&`message-sender`}`} ref={ref}>
+        <Avatar className='message-photo'
+          src={photo}
+        />
         <div className='message-contents'>
-            <p className='message-content'>
+          <p className='message-content'>
               {message}
-        </p>
-        <small className='message-timestamp'>{new Date
-          (timestamp?.toDate()).toLocaleString()}</small>  
+          </p>
+          <small className='message-timestamp'>{new Date
+            (timestamp?.toDate()).toLocaleString()}</small>  
         </div>
-    </div>
-        <div className={`message`} ref={ref}>
+      </div>
+      {response?(<div className={`message`} ref={ref}>
       <Avatar className='message-photo'
-        // src={photo}
       />
         <div className='message-contents'>
             <p className='message-content'>
               {response}
         </p>
         <small className='message-timestamp'>{new Date
-          (timestamp?.toDate()).toLocaleString()}</small>  
-        </div>
-        
-      </div>
+          (responseTimestamp?.toDate()).toLocaleString()}</small>  
+        </div></div>):(<div></div>)}
     </>
   )
 })

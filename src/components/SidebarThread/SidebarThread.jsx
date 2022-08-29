@@ -27,11 +27,11 @@ function SidebarThread({ id, threadName }) {
                 }))}
             >
                 <Avatar
-                    src={threadInfo[0]?.photo}
+                    src={threadInfo[0]?.responsePhoto?'': threadInfo[0]?.photo}
                 />
             <div className={styles.ThreadDetail}>
                     <h3>{threadName}</h3>
-                    <p>{threadInfo[0]?.message}</p>
+                    <p>{threadInfo[0]?.response?threadInfo[0]?.response:threadInfo[0]?.message}</p>
                     <p className={styles.Time}>
                         {new Date
                         (threadInfo[0]?.timestamp?.toDate())

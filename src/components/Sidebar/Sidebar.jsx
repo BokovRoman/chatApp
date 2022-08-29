@@ -7,14 +7,37 @@ import { useSelector } from 'react-redux';
 import db, { auth } from '../../firebase';
 import  BorderColorOutlinedIcon  from '@material-ui/icons/BorderColor';
 import { useEffect, useState } from 'react';
+import firebase from "firebase/compat/app";
 
 function Sidebar() {
 
   const user = useSelector(selectUser);
   const [threads, setThreads] = useState([]);
 
+  const [searchInput, setSearchInput] = useState('');
+  const [filteredResults, setFilteredResults] = useState([]);
+
+
+
+  const searchItems = (searchValue) => {
+    setSearchInput(searchValue)
+   
+        if (searchInput !== '') {
+            const filteredData = threads.filter((item) => {
+               return item.data.threadName.toLowerCase().includes(searchInput.toLowerCase())
+            })
+            setFilteredResults(filteredData)
+        }
+        else{
+            setFilteredResults(threads)
+        }
+    
+    }
+  
+
+
   useEffect(() => {
-    db.collection('threads').onSnapshot((snapshot) => {
+    db.collection('threads').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
       setThreads(snapshot.docs.map((doc) => ({
         id: doc.id,
         data:doc.data(),
@@ -26,8 +49,10 @@ function Sidebar() {
     const threadName = prompt("Enter a thread Name");
     db.collection("threads").add({
       threadName: threadName,
+      timestamp:firebase.firestore.FieldValue.serverTimestamp(),
     });
   };
+
 
   return (
       <div className={styles.Container}>
@@ -41,7 +66,8 @@ function Sidebar() {
       <div className={styles.SearchContainer}>
         <div className={styles.Search}>
           <SearchIcon />
-            <input
+              <input
+                onChange={(e) => searchItems(e.target.value)}
                 className={styles.Input} 
                 placeholder='Search or start new chat' /
             >
@@ -54,9 +80,20 @@ function Sidebar() {
           </div>
           <div className={styles.HeadText}>Chats</div>
       <div className={styles.ThreadName}>
-        
-        {
-          threads.map(({ id, data: { threadName } }
+       
+        {searchInput.length > 1 ? (
+                    filteredResults.map(({ id, data: { threadName } }
+          ) => {
+                        return (
+                            <SidebarThread
+                            key={id}
+                            id={id}
+                            threadName={threadName}
+                          />
+                        )
+                    })
+                ) : (
+                    threads.map(({ id, data: { threadName } }
           ) => (
             <SidebarThread
               key={id}
@@ -64,7 +101,8 @@ function Sidebar() {
               threadName={threadName}
             />
           ))
-        }
+                )}
+
         </div>  
     </div>
   )
